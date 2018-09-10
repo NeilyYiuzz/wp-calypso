@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { noop } from 'lodash';
 import { dispatch } from '@wordpress/data';
@@ -13,10 +13,11 @@ import { registerCoreBlocks } from '@wordpress/block-library';
  * Internal dependencies
  */
 import Editor from './edit-post/editor.js';
-import QueryGutenbergCreatePost from 'components/data/query-gutenberg-create-post';
+// import QueryGutenbergCreatePost from 'components/data/query-gutenberg-create-post';
 // needed to load a post if a post ID is provided via the route
 // import QueryGutenbergSitePost from 'components/data/query-gutenberg-site-post';
-import getGutenbergCurrentPost from 'state/selectors/get-gutenberg-current-post';
+import { requestGutenbergDraftPost as requestDraftId, requestSitePost } from 'state/data-getters';
+// import getGutenbergCurrentPost from 'state/selectors/get-gutenberg-current-post';
 import { getSelectedSiteId } from 'state/ui/selectors';
 import { getSiteSlug } from 'state/sites/selectors';
 import { WithAPIMiddleware } from './api-middleware/utils';
@@ -49,10 +50,15 @@ class GutenbergEditor extends Component {
 const mapStateToProps = state => {
 	const siteId = getSelectedSiteId( state );
 
+	const requestDraftIdData = requestDraftId( siteId );
+	const postId = get( requestDraftIdData, 'data.ID' );
+
+	const requestSitePostData = requestSitePost( siteId, postId );
+
 	return {
 		siteId,
 		siteSlug: getSiteSlug( state, siteId ),
-		post: getGutenbergCurrentPost( state ),
+		post: get( requestSitePostData, 'data', null ),
 	};
 };
 
